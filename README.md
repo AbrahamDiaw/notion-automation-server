@@ -31,6 +31,16 @@ To configure the Notion integration:
 - In your Notion database URL, get the ID before the first "?"
 - Example: In "https://www.notion.so/a8c3b6d9f4e2c1b5a7d8e9f2c3b6a9d4?v=a8c3b6d9f4e2c1b5a7d8e9f2c3b6a9d4&pvs=4", the ID is "a8c3b6d9f4e2c1b5a7d8e9f2c3b6a9d4"
 
+Here's an example of how your Notion database should be structured:
+![Notion example](public/notion-example.png)The database includes columns for:
+
+Title: The post hook
+Publication time
+Status ("💡 Idea")
+Language (Fr)
+Media (LinkedIn)
+Topic (SaaS, MVP, Tech Skills, etc.)
+
 ### 3. Anthropic Setup
 
 To get your Anthropic API key:
