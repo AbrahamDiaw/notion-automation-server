@@ -21,8 +21,15 @@ Create a `.env` file at the root of your project with the following variables:
 NOTION_TOKEN=your_notion_token
 NOTION_DATABASE_ID=your_notion_db_token
 ANTHROPIC_API_KEY=your_anthropic_api_key
+CRON_SECRET=your_cron_secret
 BLOB_READ_WRITE_TOKEN=your_vercel_blob_token
 ```
+
+The CRON_SECRET is a security measure that protects your API endpoint from unauthorized access. Make sure to:
+
+Generate a strong, random secret key
+Keep this secret secure and never expose it
+Add it to your Vercel environment variables
 
 ### 2. Notion Setup
 

@@ -4,6 +4,8 @@ import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { saveToBlobStorage } from "@/lib/blob-storage";
 import { NextResponse } from "next/server";
 import { NUMBER_OF_POSTS, topics } from "@/data";
+import * as process from "node:process";
+import { headers } from "next/headers";
 
 function splitContentIntoBlocks(content: string) {
 	return content
@@ -12,8 +14,20 @@ function splitContentIntoBlocks(content: string) {
 		.filter(part => part.length > 0);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
 	try {
+		const headersList = await headers();
+		const cronHeader = headersList.get('x-vercel-cron');
+		const vercelDeploymentUrl = headersList.get('x-vercel-deployment-url');
+		
+		const isVercelCron = cronHeader && vercelDeploymentUrl?.includes('vercel.app');
+		const hasValidSecret = request.headers.get('Authorization') === `Bearer ${process.env.CRON_SECRET}`;
+		
+		if (!isVercelCron && !hasValidSecret) {
+			console.log('Unauthorized access attempt');
+			return new NextResponse("Unauthorized", { status: 401 });
+		}
+		
 		const allIdeas = [];
 		
 		for (let i = 0; i < NUMBER_OF_POSTS; i++) {
