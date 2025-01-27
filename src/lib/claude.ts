@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { claude_system } from "@/data";
 
 if (!process.env.ANTHROPIC_API_KEY) {
 	throw new Error("Missing ANTHROPIC_API_KEY environment variable");
@@ -16,6 +17,11 @@ interface LinkedInPost {
 
 interface ParsedPosts {
 	ideas: LinkedInPost[];
+}
+
+interface ContentBlock {
+	type: string;
+	text: string;
 }
 
 
@@ -67,7 +73,7 @@ Quelles sont vos astuces pour progresser en tant que dev ?</content>
 		model: "claude-3-opus-20240229",
 		max_tokens: 1000,
 		temperature: 0.7,
-		system: "You are a technical thought leader crafting engaging content about innovation, software development, and emerging tech trends.",
+		system: claude_system,
 		messages: [{
 			role: "user",
 			content: PROMPT.replace("{topic}", topic)
@@ -76,18 +82,8 @@ Quelles sont vos astuces pour progresser en tant que dev ?</content>
 	
 	console.log({ message });
 	
-	console.log({ content: message.content });
-	const parsedPosts = parseContentBlocks(message.content);
-	console.log({ parsedPosts });
-	
-	return parsedPosts;
+	return parseContentBlocks(message.content);
 }
-
-interface ContentBlock {
-	type: string;
-	text: string;
-}
-
 
 function parseContentBlocks(response: ContentBlock[]): ParsedPosts {
 	if (!response?.[0]?.text) return { ideas: [] };
@@ -108,7 +104,7 @@ function parseContentBlocks(response: ContentBlock[]): ParsedPosts {
 			ideas: [{
 				hook: hookMatch[1].trim(),
 				content: contentMatch[1].trim(),
-				hashtags: hashtagsMatch[1].trim().split(' ')
+				hashtags: hashtagsMatch[1].trim().split(' '),
 			}]
 		};
 		
@@ -117,25 +113,3 @@ function parseContentBlocks(response: ContentBlock[]): ParsedPosts {
 		return { ideas: [] };
 	}
 }
-
-export async function improvePost(content: string) {
-	const message = await anthropic.messages.create({
-		model: "claude-3-opus-20240229",
-		max_tokens: 1000,
-		messages: [{
-			role: "user",
-			content: `Improve this LinkedIn post while keeping its core message. Make it more engaging and professional:
-
-      ${content}
-      
-      Provide the improved version with:
-      1. A stronger hook
-      2. Better formatting
-      3. More compelling call-to-action
-      4. Relevant hashtags`
-		}]
-	});
-	
-	return message.content;
-}
-

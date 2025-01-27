@@ -1,6 +1,8 @@
-// lib/blob-storage.ts
 import { put, list } from '@vercel/blob';
 
+/**
+ * Interface representing a post with its metadata
+ */
 interface Post {
 	hook: string;
 	content: string;
@@ -9,45 +11,37 @@ interface Post {
 	generatedAt: string;
 }
 
+/**
+ * Interface representing the stored data structure
+ */
 interface PostsData {
 	posts: Post[];
 	lastUpdated: string;
 }
 
+/**
+ * Saves new posts to Blob storage
+ * @param newPosts - Array of new posts to save
+ * @returns Promise containing the created file URL and updated data
+ * @throws Error if saving fails
+ */
 export async function saveToBlobStorage(newPosts: Post[]) {
 	try {
-		// Récupérer les posts existants
-		let existingData: PostsData = { posts: [], lastUpdated: new Date().toISOString() };
-		console.log('existingData', existingData);
-		try {
-			const { blobs } = await list();
-			console.log('blobs', blobs);
-			if (blobs.length > 0) {
-				// Trouver le dernier fichier par date
-				const latestBlob = blobs
-					.filter(blob => blob.pathname.startsWith('posts-'))
-					.sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())[0];
-				
-				if (latestBlob) {
-					// Fetch le contenu du dernier fichier
-					const response = await fetch(latestBlob.url);
-					const text = await response.text();
-					existingData = JSON.parse(text);
-				}
-			}
-		} catch (error) {
-			console.log('No existing data found, creating new storage');
-		}
+		// Retrieve existing data
+		const existingData = await getLatestPosts();
+		console.log({existingData})
 		
+		// Create updated data
 		const updatedData: PostsData = {
 			posts: [...existingData.posts, ...newPosts],
 			lastUpdated: new Date().toISOString()
 		};
 		
-		// Format de la date : YYYY-MM-DD
+		// Generate filename with current date
 		const date = new Date().toISOString().split('T')[0];
 		const filename = `posts-${date}.json`;
 		
+		// Save to Blob storage
 		const { url } = await put(filename, JSON.stringify(updatedData, null, 2), {
 			access: 'public',
 			addRandomSuffix: false
@@ -60,14 +54,21 @@ export async function saveToBlobStorage(newPosts: Post[]) {
 	}
 }
 
+/**
+ * Retrieves the most recent posts from Blob storage
+ * @returns Promise containing the posts data
+ * @throws Error if retrieval fails
+ */
 export async function getLatestPosts(): Promise<PostsData> {
 	try {
 		const { blobs } = await list();
+		
+		// If no blobs exist, return empty structure
 		if (blobs.length === 0) {
 			return { posts: [], lastUpdated: new Date().toISOString() };
 		}
 		
-		// Trouver le fichier le plus récent
+		// Find the most recent file
 		const latestBlob = blobs
 			.filter(blob => blob.pathname.startsWith('posts-'))
 			.sort((a, b) => b.uploadedAt.getTime() - a.uploadedAt.getTime())[0];
@@ -76,6 +77,7 @@ export async function getLatestPosts(): Promise<PostsData> {
 			return { posts: [], lastUpdated: new Date().toISOString() };
 		}
 		
+		// Retrieve and parse data
 		const response = await fetch(latestBlob.url);
 		const text = await response.text();
 		return JSON.parse(text);

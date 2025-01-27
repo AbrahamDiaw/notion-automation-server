@@ -1,11 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/generate-ideas",
+      "path": "/api/cron/generate-ideas",
       "schedule": "0 8 * * *"
     },
     {
-      "path": "/api/generate-ideas",
+      "path": "/api/cron/generate-ideas",
       "schedule": "0 0 * * *"
     }
   ]

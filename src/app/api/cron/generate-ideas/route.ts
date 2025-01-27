@@ -3,26 +3,7 @@ import { notion } from '@/lib/notion'
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { saveToBlobStorage } from "@/lib/blob-storage";
 import { NextResponse } from "next/server";
-
-const topics = [
-	"Automatisation",
-	"Intelligence Artificielle",
-	"Productivité",
-	"Opportunités",
-	"Organisation",
-	"Outils Tech",
-	"Focus",
-	"MVP",
-	"Itération",
-	"Prototype",
-	"Innovation Rapide",
-	"Échec Tech",
-	"Rebondir",
-	"Leçons Apprises",
-	"Résilience",
-	"Compétences Tech",
-	"SaaS",
-]
+import { NUMBER_OF_POSTS, topics } from "@/data";
 
 function splitContentIntoBlocks(content: string) {
 	return content
@@ -31,15 +12,13 @@ function splitContentIntoBlocks(content: string) {
 		.filter(part => part.length > 0);
 }
 
-const NUMBER_OF_POSTS = 10;
-
 export async function GET() {
 	try {
 		const allIdeas = [];
+		
 		for (let i = 0; i < NUMBER_OF_POSTS; i++) {
 			const topic = topics[Math.floor(Math.random() * topics.length)];
 			const { ideas } = await generatePostIdeas(topic);
-			console.log(ideas);
 			
 			for (const idea of ideas) {
 				const contentBlocks = splitContentIntoBlocks(idea.content);
@@ -81,6 +60,7 @@ export async function GET() {
 						Status: { select: { name: "💡 Idea" } },
 						Language: { select: { name: "Fr" } },
 						Media: { select: { name: "Linkedin" } },
+						Topic: { select: { name: topic } },
 					},
 					children: blocks
 				});
@@ -91,8 +71,8 @@ export async function GET() {
 					generatedAt: new Date().toISOString()
 				});
 			}
-			
 		}
+		
 		const { url, data } = await saveToBlobStorage(allIdeas);
 		
 		return NextResponse.json({
