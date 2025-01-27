@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { generatePostIdeas } from '@/lib/claude'
 import { notion } from '@/lib/notion'
 import { BlockObjectRequest } from "@notionhq/client/build/src/api-endpoints";
 import { saveToBlobStorage } from "@/lib/blob-storage";
+import { NextResponse } from "next/server";
 
 const topics = [
 	"Automatisation",
@@ -33,7 +33,7 @@ function splitContentIntoBlocks(content: string) {
 
 const NUMBER_OF_POSTS = 10;
 
-export async function GET(request: NextRequest) {
+export async function GET() {
 	try {
 		const allIdeas = [];
 		for (let i = 0; i < NUMBER_OF_POSTS; i++) {
