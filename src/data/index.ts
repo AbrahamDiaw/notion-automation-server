@@ -5,7 +5,7 @@
 /**
  * Defines the number of posts to generate in each batch
  */
-export const NUMBER_OF_POSTS = 2;
+export const NUMBER_OF_POSTS = 5;
 
 /**
  * List of available topics for content generation
